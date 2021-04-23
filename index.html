@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ld48</title>
+
+    <style>
+body {
+  margin: 0;
+}
+
+#canvas-container {
+  width: 100vw;
+  height: 100vh;
+}
+    </style>
+  </head>
+  
+  <body>
+    <div id="canvas-container"></div>
+
+    <script type="module">
+import LD48 from './src/ld48.js';
+
+const container = document.querySelector('#canvas-container');
+const ld48 = new LD48(container);
+    </script>
+  </body>
+</html>
