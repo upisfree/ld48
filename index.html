@@ -6,11 +6,32 @@
     <style>
 body {
   margin: 0;
+  overflow: hidden;
+}
+
+.visible {
+  opacity: 1 !important;
 }
 
 #canvas-container {
   width: 100vw;
   height: 100vh;
+}
+
+#killed-sign {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 100%;
+  margin: 0;
+  transform: rotate(-340deg) translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  font-size: 66pt;
+  font-family: 'Helvetica', sans-serif;
+  color: #888;
+  user-select: none;
+  transition: 200ms opacity ease-out; 
+  opacity: 0;
 }
     </style>
   </head>
@@ -18,11 +39,14 @@ body {
   <body>
     <div id="canvas-container"></div>
 
+    <h1 id="killed-sign">ВАС УБИЛИ блин ((</h1>
+
     <script type="module">
 import LD48 from './src/ld48.js';
 
 const container = document.querySelector('#canvas-container');
-const ld48 = new LD48(container);
+const killedSign = document.querySelector('#killed-sign');
+const ld48 = new LD48(container, killedSign);
     </script>
   </body>
 </html>

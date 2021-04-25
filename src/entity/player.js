@@ -6,21 +6,20 @@ import Entity from './entity.js';
 import { Key } from '../platform/keyboard.js';
 
 class Player extends Entity {
-  speed = 0.5;
+  speed = 0.4;
   inertia = 0.8;
 
   constructor(engine) {
     super(engine);
 
-    this.geometry = new BoxGeometry(1, 1, 1);
-    this.material = new MeshBasicMaterial({
-      color: 0x0000ff,
-      wireframe: true
-    });
-
     // start kit
     this.level = 1;
     this.kills = this.killsPerStage;
+
+    // debug
+    // this.level = 5;
+    // this.kills = this.killsPerStage * 5;
+    // this.updateMeshAfterKill();
 
     console.log(this);
   }
@@ -30,14 +29,27 @@ class Player extends Entity {
 
     this.updateKeyboard();
 
+    const unit = this.position.clone().normalize();
+    const angle = Math.atan2(unit.y, unit.x);
+    this.rotation.z = angle;
+
     const nearest = this.getNearestEntity();
-    this.checkKilling(nearest);
+
+    if (nearest) {
+      this.checkKilling(nearest);      
+    }
   }
 
   dispose() {
     super.dispose();
 
-    console.info('DEATH')
+    console.info('DEATH');
+
+    this.engine.killedSign.classList.add('visible');
+
+    setTimeout(() => {
+      location.reload();
+    }, 4000);
   }
 
   move(x, y) {

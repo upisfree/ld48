@@ -1,4 +1,20 @@
-import { Mesh, Vector2, Box3 } from '../../lib/three.module.js';
+import {
+  Mesh,
+  Vector2,
+  Box3,
+  Float32BufferAttribute,
+  BoxGeometry,
+  MeshBasicMaterial,
+  MeshNormalMaterial,
+  MeshMatcapMaterial,
+  MeshLambertMaterial,
+  MeshToonMaterial,
+  MeshStandardMaterial,
+  BackSide,
+  FrontSide,
+  SphereGeometry
+} from '../../lib/three.module.js';
+import * as TWEEN from '../../lib/tween.esm.js';
 import Player from './player.js';
 import lerp from '../math/lerp.js';
 
@@ -13,8 +29,24 @@ class Entity extends Mesh {
   killsScaleFactor = 0.25;
   killsPerStage = 4;
 
+  maxScale = 50;
+
   constructor(engine) {
     super();
+
+    this.geometry = this.createGeometry();
+    // this.material = new MeshStandardMaterial({
+    // this.material = new MeshToonMaterial({
+    this.material = new MeshNormalMaterial({
+      // color: 0x0000ff,
+      wireframe: true,
+      morphTargets: true,
+      morphNormals: true,
+      // flatShading: true,
+      // side: BackSide
+    });
+
+    this.updateMorphTargets();
 
     this.engine = engine;
 
@@ -36,6 +68,37 @@ class Entity extends Mesh {
     }
 
     this.boundingBox.copy(this.geometry.boundingBox).applyMatrix4(this.matrixWorld);
+  }
+
+  createGeometry() {
+    const geometry = new BoxGeometry(1, 1, 1, 32, 32, 32);
+
+    // create an empty array to  hold targets for the attribute we want to morph
+    // morphing positions and normals is supported
+    geometry.morphAttributes.position = [];
+
+    // the original positions of the cube's vertices
+    const positionAttribute = geometry.attributes.position;
+    
+    // for the first morph target we'll move the cube's vertices onto the surface of a sphere
+    const spherePositions = [];
+
+    for (let i = 0; i < positionAttribute.count; i++) {
+      const x = positionAttribute.getX(i);
+      const y = positionAttribute.getY(i);
+      const z = positionAttribute.getZ(i);
+
+      spherePositions.push(
+        x * Math.sqrt(1 - (y * y / 2) - (z * z / 2) + (y * y * z * z / 3)),
+        y * Math.sqrt(1 - (z * z / 2) - (x * x / 2) + (z * z * x * x / 3)),
+        z * Math.sqrt(1 - (x * x / 2) - (y * y / 2) + (x * x * y * y / 3))
+      );
+    }
+
+    // add the spherical positions as the first morph target
+    geometry.morphAttributes.position[0] = new Float32BufferAttribute(spherePositions, 3);
+
+    return geometry;
   }
 
   dispose() {
@@ -75,6 +138,7 @@ class Entity extends Mesh {
     return this.boundingBox.intersectsBox(entity.boundingBox);
   }
 
+  // VIEW
   // 0. always mesh scale up
   // ?. mesh gravitation?
   // ?. collide box is higher
@@ -85,17 +149,43 @@ class Entity extends Mesh {
   // 
   // morphs
   // triangle stage?
-  // more kills per stage
+  // more kills per stage – !!!!!!!!!!!
+  // gameplay USING SPACE. more aggressive enemies. space usage is limited by timer.
+  //   more space between enemies.  – !!!!!!!!!!!
+  // sound? 
+
+  // возьми с собой большие проводные наушники, которые не жалко
   updateMeshAfterKill() {
     this.kills++;
     this.level = Math.floor(this.kills / this.killsPerStage);
 
     const scale = 1 + this.kills * this.killsScaleFactor;
-    this.scale.set(scale, scale, scale);
+
+    if (scale < this.maxScale) {
+      this.scale.set(scale, scale, scale);
+    }
+
+    switch (true) {
+      case (this.level === 2):
+        new TWEEN.Tween(this.rotation)
+          .to({ x: Math.PI / 3, y: 0, z: Math.PI / 4 }, 200)
+          .easing(TWEEN.Easing.Quadratic.Out)
+          .start();
+
+        break;
+
+      case (this.level >= 3 && this.level <= 10):
+        // this.morphTargetInfluences[0] = 4.25;
+        this.morphTargetInfluences[0] = (this.level - 3) / 2;
+        
+        console.log(this.level, this.morphTargetInfluences[0]);
+
+        break;
+    }
   }
 
   checkKilling(entity) {
-    if (this.isCollidesWithEntity(entity) && !(entity instanceof Player)) {
+    if (this.isCollidesWithEntity(entity)) {
       if (this.level > entity.level) {
         this.killEntity(entity);
       } else if (this.level < entity.level) {
