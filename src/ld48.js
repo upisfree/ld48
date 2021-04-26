@@ -43,8 +43,9 @@ class LD48 {
   entities = [];
   enemies = [];
 
-  constructor(container, killedSign) {
+  constructor(container, victorySign, killedSign) {
     this.container = container;
+    this.victorySign = victorySign;
     this.killedSign = killedSign;
 
     this.renderer = new WebGLRenderer({

@@ -38,6 +38,18 @@ class Player extends Entity {
     if (nearest) {
       this.checkKilling(nearest);      
     }
+
+    console.log(this.scale.x, this.maxScale);
+
+    if (this.scale.x >= this.maxScale - 1) {
+      this.engine.victorySign.classList.add('visible');
+
+      console.log(this.engine.victorySign);
+
+      setTimeout(() => {
+        location.reload();
+      }, 4000);
+    }
   }
 
   dispose() {

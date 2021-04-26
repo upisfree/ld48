@@ -130,6 +130,17 @@ class Entity extends Mesh {
       })[0];
   }
 
+  getNearestEntityWithLessKills() {
+    return this.engine.entities
+      .filter(e => e !== this)
+      .sort((a, b) => {
+        return a.kills - b.kills;
+      })
+      .sort((a, b) => {
+        return this.position.distanceTo(a.position) - this.position.distanceTo(b.position);
+      })[0];
+  }
+
   isCollidesWithEntity(entity) {
     if (entity === this || entity.boundingBox === undefined) {
       return false;
@@ -154,7 +165,9 @@ class Entity extends Mesh {
   //   more space between enemies.  – !!!!!!!!!!!
   // sound? 
 
-  // возьми с собой большие проводные наушники, которые не жалко
+  // враги убегают от больших чуваков!
+
+  // gameplay first and then is lookis (morphs)
   updateMeshAfterKill() {
     this.kills++;
     this.level = Math.floor(this.kills / this.killsPerStage);
@@ -178,7 +191,7 @@ class Entity extends Mesh {
         // this.morphTargetInfluences[0] = 4.25;
         this.morphTargetInfluences[0] = (this.level - 3) / 2;
         
-        console.log(this.level, this.morphTargetInfluences[0]);
+        // console.log(this.level, this.morphTargetInfluences[0]);
 
         break;
     }

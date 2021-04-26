@@ -25,7 +25,7 @@ class Enemy extends Entity {
   }
 
   updateAI() {
-    const nearest = this.getNearestEntity();
+    const nearest = this.getNearestEntityWithLessKills();
     const angle = Math.atan2(nearest.position.y - this.position.y, nearest.position.x - this.position.x);
 
     new TWEEN.Tween(this.rotation)
